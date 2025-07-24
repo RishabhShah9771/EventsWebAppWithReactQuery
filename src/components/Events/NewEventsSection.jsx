@@ -1,55 +1,50 @@
-import { useEffect, useState } from 'react';
+import LoadingIndicator from "../UI/LoadingIndicator.jsx";
+import ErrorBlock from "../UI/ErrorBlock.jsx";
+import EventItem from "./EventItem.jsx";
+import { useQuery } from "@tanstack/react-query";
+import { fetchEvents } from "../../util/http.js";
 
-import LoadingIndicator from '../UI/LoadingIndicator.jsx';
-import ErrorBlock from '../UI/ErrorBlock.jsx';
-import EventItem from './EventItem.jsx';
-
+// This component displays a section with the most recently added events.
+// It uses React Query (TanStack Query) to fetch and manage the events data.
 export default function NewEventsSection() {
-  const [data, setData] = useState();
-  const [error, setError] = useState();
-  const [isLoading, setIsLoading] = useState(false);
+  // useQuery is used to fetch events data asynchronously and manage its state.
+  // queryFn is the function that returns a promise resolving to the events data.
+  // queryKey is a unique identifier for this query; it must always be an array.
+  // staleTime specifies how long the data is considered fresh before a refetch is triggered.
+  // gcTime (commented out) would control how long the cached data is kept before being garbage collected.
+  const { data, isPending, isError, error } = useQuery({
+    queryFn: fetchEvents,
+    queryKey: ["events"],
+    staleTime: 5000,
+    // We can ensure that no unnecessary requests are made by setting the staleTime.
+    // This is the duration after which the data will be considered stale and refetched.
+    // gcTime: 30000,
+    // This is the duration after which the cached data will be garbage collected,
+    // meaning the cached data will be cleared after this time.
+  });
 
-  useEffect(() => {
-    async function fetchEvents() {
-      setIsLoading(true);
-      const response = await fetch('http://localhost:3000/events');
-
-      if (!response.ok) {
-        const error = new Error('An error occurred while fetching the events');
-        error.code = response.status;
-        error.info = await response.json();
-        throw error;
-      }
-
-      const { events } = await response.json();
-
-      return events;
-    }
-
-    fetchEvents()
-      .then((events) => {
-        setData(events);
-      })
-      .catch((error) => {
-        setError(error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  // TanStack Query will not send the HTTP request until the component is mounted.
+  // The developer must write the code for the actual request and handle the response.
+  // After that, the query will manage the data, errors, caching, and much more.
 
   let content;
 
-  if (isLoading) {
+  // If the query is still loading, show a loading indicator.
+  if (isPending) {
     content = <LoadingIndicator />;
   }
 
-  if (error) {
+  // If there was an error during the fetch, show an error block with a message.
+  if (isError) {
     content = (
-      <ErrorBlock title="An error occurred" message="Failed to fetch events" />
+      <ErrorBlock
+        title="An error occurred"
+        message={error.info?.message || "Failed to fetch events."}
+      />
     );
   }
 
+  // If data was successfully fetched, render the list of events.
   if (data) {
     content = (
       <ul className="events-list">
@@ -62,6 +57,7 @@ export default function NewEventsSection() {
     );
   }
 
+  // Render the section with a header and the appropriate content (loading, error, or events list).
   return (
     <section className="content-section" id="new-events-section">
       <header>
