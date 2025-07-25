@@ -8,7 +8,8 @@ import Events from "./components/Events/Events.jsx";
 import EventDetails from "./components/Events/EventDetails.jsx";
 import NewEvent from "./components/Events/NewEvent.jsx";
 import EditEvent from "./components/Events/EditEvent.jsx";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./util/http.js";
 
 const router = createBrowserRouter([
   {
@@ -40,8 +41,6 @@ const router = createBrowserRouter([
 
 //need to create a query client to use react-query
 //Query CLient is the core of the react-query lib.
-
-const queryClient = new QueryClient();
 //Provide is the component that will proide the query client to the app.
 //It will be used in the root component of the app.
 
