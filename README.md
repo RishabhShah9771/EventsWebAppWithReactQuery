@@ -62,3 +62,43 @@ In this example:
 
 For more information, visit the [TanStack Query documentation](https://tanstack.com/query/latest).
 tanstack Query
+
+## Important Component: `QueryClient` and `QueryClientProvider`
+
+A core part of using TanStack Query is setting up a `QueryClient` and wrapping your application with the `QueryClientProvider`. This enables query caching, background updates, and other features throughout your React app.
+
+### `QueryClient`
+
+The `QueryClient` is the central manager for all queries and mutations in your application. It handles caching, background fetching, and more.
+
+```js
+import { QueryClient } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+```
+
+### `QueryClientProvider`
+
+To make the `QueryClient` available to your React components, wrap your app with the `QueryClientProvider` at the root level:
+
+```jsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+function App() {
+    return (
+        <QueryClientProvider client={queryClient}>
+            {/* Your app components */}
+        </QueryClientProvider>
+    );
+}
+```
+
+**Why is this important?**
+
+- Ensures all components can use hooks like `useQuery` and `useMutation`.
+- Manages global query state, caching, and background updates.
+- Required for TanStack Query Devtools and advanced features.
+
+For more details, see the [QueryClient documentation](https://tanstack.com/query/latest/docs/framework/react/reference/QueryClient).
