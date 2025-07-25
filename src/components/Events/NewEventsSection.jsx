@@ -13,8 +13,8 @@ export default function NewEventsSection() {
   // staleTime specifies how long the data is considered fresh before a refetch is triggered.
   // gcTime (commented out) would control how long the cached data is kept before being garbage collected.
   const { data, isPending, isError, error } = useQuery({
-    queryFn: fetchEvents,
-    queryKey: ["events"],
+    queryFn: ({ signal, queryKey }) => fetchEvents({ signal, ...queryKey[1] }),
+    queryKey: ["events", { max: 3 }],
     staleTime: 5000,
     // We can ensure that no unnecessary requests are made by setting the staleTime.
     // This is the duration after which the data will be considered stale and refetched.

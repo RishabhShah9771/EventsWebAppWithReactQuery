@@ -5,31 +5,38 @@ const queryClient = new QueryClient();
 
 /**
  * Fetches a list of events from the backend.
- * Optionally filters events by a search term.
+ * Optionally filters events by a search term and/or a maximum number.
  * @param {Object} params - Parameters for fetching events.
  * @param {AbortSignal} params.signal - Signal to abort the fetch request.
  * @param {string} [params.searchTerm] - Optional search term to filter events.
+ * @param {number} [params.max] - Optional maximum number of events to fetch.
  * @returns {Promise<Array>} - Resolves to an array of event objects.
  * @throws {Error} - Throws error if the fetch fails.
  */
-async function fetchEvents({ signal, searchTerm }) {
+async function fetchEvents({ signal, searchTerm, max }) {
+  // Build the URL with optional query parameters
   let url = "http://localhost:3000/events";
-  if (searchTerm) {
+  if (searchTerm && max) {
+    url += "?search=" + searchTerm + "&max=" + max;
+  } else if (searchTerm) {
     url += "?search=" + searchTerm;
+  } else if (max) {
+    url += "?max=" + max;
   }
+
+  // Make the fetch request
   const response = await fetch(url, { signal: signal });
 
+  // Handle error response
   if (!response.ok) {
-    // If response is not OK, throw an error with additional info
     const error = new Error("An error occurred while fetching the events");
     error.code = response.status;
     error.info = await response.json();
     throw error;
   }
 
-  // Destructure events from the response JSON
+  // Parse and return the events array from the response
   const { events } = await response.json();
-
   return events;
 }
 
@@ -40,6 +47,7 @@ async function fetchEvents({ signal, searchTerm }) {
  * @throws {Error} - Throws error if the creation fails.
  */
 async function createNewEvent(eventData) {
+  // Send POST request to create a new event
   const response = await fetch(`http://localhost:3000/events`, {
     method: "POST",
     body: JSON.stringify(eventData),
@@ -48,17 +56,16 @@ async function createNewEvent(eventData) {
     },
   });
 
+  // Handle error response
   if (!response.ok) {
-    // If response is not OK, throw an error with additional info
     const error = new Error("An error occurred while creating the event");
     error.code = response.status;
     error.info = await response.json();
     throw error;
   }
 
-  // Destructure event from the response JSON
+  // Parse and return the created event object
   const { event } = await response.json();
-
   return event;
 }
 
@@ -70,21 +77,21 @@ async function createNewEvent(eventData) {
  * @throws {Error} - Throws error if the fetch fails.
  */
 async function fetchSelectableImages({ signal }) {
+  // Make the fetch request for images
   const response = await fetch(`http://localhost:3000/events/images`, {
     signal,
   });
 
+  // Handle error response
   if (!response.ok) {
-    // If response is not OK, throw an error with additional info
     const error = new Error("An error occurred while fetching the images");
     error.code = response.status;
     error.info = await response.json();
     throw error;
   }
 
-  // Destructure images from the response JSON
+  // Parse and return the images array from the response
   const { images } = await response.json();
-
   return images;
 }
 
@@ -97,21 +104,21 @@ async function fetchSelectableImages({ signal }) {
  * @throws {Error} - Throws error if the fetch fails.
  */
 async function fetchEvent({ id, signal }) {
+  // Make the fetch request for a single event by ID
   const response = await fetch(`http://localhost:3000/events/${id}`, {
     signal,
   });
 
+  // Handle error response
   if (!response.ok) {
-    // If response is not OK, throw an error with additional info
     const error = new Error("An error occurred while fetching the event");
     error.code = response.status;
     error.info = await response.json();
     throw error;
   }
 
-  // Destructure event from the response JSON
+  // Parse and return the event object from the response
   const { event } = await response.json();
-
   return event;
 }
 
@@ -123,12 +130,13 @@ async function fetchEvent({ id, signal }) {
  * @throws {Error} - Throws error if the deletion fails.
  */
 async function deleteEvent({ id }) {
+  // Send DELETE request to remove the event by ID
   const response = await fetch(`http://localhost:3000/events/${id}`, {
     method: "DELETE",
   });
 
+  // Handle error response
   if (!response.ok) {
-    // If response is not OK, throw an error with additional info
     const error = new Error("An error occurred while deleting the event");
     error.code = response.status;
     error.info = await response.json();
@@ -148,6 +156,7 @@ async function deleteEvent({ id }) {
  * @throws {Error} - Throws error if the update fails.
  */
 async function updateEvent({ id, event }) {
+  // Send PUT request to update the event by ID
   const response = await fetch(`http://localhost:3000/events/${id}`, {
     method: "PUT",
     body: JSON.stringify({ event }),
@@ -156,8 +165,8 @@ async function updateEvent({ id, event }) {
     },
   });
 
+  // Handle error response
   if (!response.ok) {
-    // If response is not OK, throw an error with additional info
     const error = new Error("An error occurred while updating the event");
     error.code = response.status;
     error.info = await response.json();
@@ -168,6 +177,7 @@ async function updateEvent({ id, event }) {
   return response.json();
 }
 
+// Export all utility functions and the queryClient instance
 export {
   fetchEvents,
   createNewEvent,
